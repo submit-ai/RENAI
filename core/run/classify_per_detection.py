@@ -3,7 +3,7 @@ import sys
 
 # RADIO (nvidia/C-RADIOv3-H, trust_remote_code=True) est chargé depuis HuggingFace Hub
 # au runtime, sans accès réseau garanti sur les postes à accès restreint (proxy/firewall
-# institutionnel, ex. OFB). On bundle un cache HuggingFace local (poids + code distant)
+# institutionnel). On bundle un cache HuggingFace local (poids + code distant)
 # et on force le mode offline avant tout import de transformers/torch, comme pour le
 # backbone dinov2-base de la Detection (voir core/run/detect_and_crop.py).
 _HF_CACHE_DIR = os.path.normpath(os.path.join(

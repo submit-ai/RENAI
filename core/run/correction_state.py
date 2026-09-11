@@ -88,13 +88,20 @@ def load(drop_dir):
 
 def clear(drop_dir):
     """Drop the state — the pipeline calls this when it reprocesses a drop,
-    since that overwrites the camera CSVs and voids any previous correction."""
+    since that overwrites the camera CSVs and voids any previous correction.
+
+    Returns False if the file is still there: the caller has to say so, because
+    a surviving state file makes the Indicators sheet claim corrections that
+    reprocessing has just overwritten — the exact lie this module exists to
+    prevent.
+    """
+    p = path_for(drop_dir)
     try:
-        p = path_for(drop_dir)
         if os.path.isfile(p):
             os.remove(p)
+        return True
     except OSError:
-        pass
+        return not os.path.isfile(p)
 
 
 def _save(drop_dir, data):

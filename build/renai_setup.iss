@@ -168,7 +168,7 @@ Source: "..\core\export\*"; DestDir: "{app}\app\core\export"; Flags: ignoreversi
 ; Custom trained models (rfdetr detector + classifier)
 Source: "..\core\models\detecteur\rfdetr_model.pth";             DestDir: "{app}\app\core\models\detecteur";    Flags: ignoreversion
 ; Bundled HuggingFace cache for facebook/dinov2-base (RF-DETR backbone) — avoids any
-; network dependency on huggingface.co at runtime (restricted-network machines, e.g. OFB)
+; network dependency on huggingface.co at runtime (machines behind a restricted network)
 Source: "..\core\models\detecteur\hf_cache\*";                   DestDir: "{app}\app\core\models\detecteur\hf_cache"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "..\core\models\classifieur\classifieur.joblib";         DestDir: "{app}\app\core\models\classifieur";  Flags: ignoreversion
 Source: "..\core\models\classifieur\label_encoder.npy";          DestDir: "{app}\app\core\models\classifieur";  Flags: ignoreversion
