@@ -1951,7 +1951,9 @@ class RenaiApp(tk.Tk):
         bullet("Also regenerates classification_campaign.csv and classification_campaign.xlsx "
                "(including a Species presence matrix sheet) whenever the drop belongs to a "
                "campaign — whether you opened the campaign folder or that single drop.")
-        bullet("Only detections with a known family (not 'inconnu') are written to the outputs.")
+        bullet("Detections left as 'unknown' are written to the outputs like any other, in "
+               "their own family column: a fish that was seen but not identified is still a "
+               "fish that was seen, and dropping it would quietly lower every count.")
         bullet("The button turns orange when there are unsaved changes.")
         bullet("Records the correction in correction_state.json, which the Indicators sheet "
                "reports as 'n/m cameras edited' so nobody mistakes raw detections for "

@@ -42,7 +42,7 @@ WARN_FG       = "92400E"
 ALL_FAMILIES = [
     'acanthuridae', 'carangidae', 'chaetodontidae', 'haemulidae', 'holocentridae',
     'labridae', 'lutjanidae', 'pomacentridae', 'scaridae', 'scombridae',
-    'serranidae', 'sphyraenidae', 'inconnu',
+    'serranidae', 'sphyraenidae', 'unknown',
 ]
 
 COL_WIDTHS = {
@@ -62,6 +62,20 @@ COL_LABELS = {
     'count': 'Count', 'confidence': 'Confidence',
     'habitat': 'Habitat', 'visibility': 'Visibility', 'depth': 'Depth',
 }
+
+
+def _normalise_unknown(df):
+    """Accepte l'ancien libellé français d'une détection non identifiée.
+
+    Le label était 'inconnu' jusqu'à la 1.3.0 — un mot français au milieu de
+    sorties entièrement anglaises. Renommé 'unknown', mais des fichiers corrigés
+    avec une version antérieure peuvent encore porter l'ancien ; sans cette
+    conversion ils apparaîtraient comme une famille de plus, hors du tableau.
+    """
+    for col in ('family', 'genus', 'species'):
+        if col in df.columns:
+            df[col] = df[col].replace('inconnu', 'unknown')
+    return df
 
 
 def _set_border(cell):
@@ -585,6 +599,7 @@ def main():
     if df.empty:
         print("[WARN] Empty CSV, Excel not generated.")
         return
+    df = _normalise_unknown(df)
 
     wb = Workbook()
     _build_detections_sheet(wb, df)

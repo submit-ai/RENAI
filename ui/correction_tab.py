@@ -44,7 +44,7 @@ F_SMALL = ("Segoe UI", 8)
 FAMILIES = [
     'acanthuridae', 'carangidae', 'chaetodontidae', 'haemulidae', 'holocentridae',
     'labridae', 'lutjanidae', 'pomacentridae', 'scaridae', 'scombridae',
-    'serranidae', 'sphyraenidae', 'inconnu',
+    'serranidae', 'sphyraenidae', 'unknown',
 ]
 
 FAMILY_COLORS = {
@@ -60,7 +60,7 @@ FAMILY_COLORS = {
     'scombridae':     '#718096',
     'serranidae':     '#90CDF4',
     'sphyraenidae':   '#ED8936',
-    'inconnu':        '#A0AEC0',
+    'unknown':        '#A0AEC0',
 }
 
 def _load_species_config():
@@ -500,7 +500,7 @@ class CorrectionTab(tk.Frame):
                 det_id   = os.path.splitext(det_name)[0]
                 cls_path = os.path.join(cls_dir, frame_id, f'{det_id}.txt')
 
-                family, confidence, status = 'inconnu', 0.0, 'ok'
+                family, confidence, status = 'unknown', 0.0, 'ok'
                 if os.path.isfile(cls_path):
                     try:
                         with open(cls_path, encoding='utf-8') as f:
@@ -511,7 +511,10 @@ class CorrectionTab(tk.Frame):
                         if raw_fam == 'fp':
                             status = 'fp'
                         else:
-                            family = raw_fam
+                            # 'inconnu' : ancien libellé français, antérieur à
+                            # la 1.3.0 — relu tel quel, il apparaîtrait comme
+                            # une famille à part entière.
+                            family = 'unknown' if raw_fam == 'inconnu' else raw_fam
                     except Exception:
                         pass
 
@@ -738,7 +741,7 @@ class CorrectionTab(tk.Frame):
         x1, y1, x2, y2 = det['bbox']
         w_px, h_px      = x2 - x1, y2 - y1
         is_fp           = det['status'] == 'fp'
-        is_unknown      = det['family'] == 'inconnu'
+        is_unknown      = det['family'] == 'unknown'
         is_added        = det['status'] == 'added'
         is_selected     = (idx == self._selected_det_idx)
         family_changed  = det['family'] != det['family_orig']
@@ -806,7 +809,7 @@ class CorrectionTab(tk.Frame):
         cur_sci  = det.get('species', '')
         cur_disp = _SCI_TO_DISP.get(cur_sci, '')
         _fam     = det['family']
-        if _fam == 'inconnu':
+        if _fam == 'unknown':
             sp_options = _ALL_SPECIES_DISP
             sp_state   = 'readonly'
         else:
@@ -842,10 +845,10 @@ class CorrectionTab(tk.Frame):
         ).pack(side=tk.LEFT, padx=(0, 4))
         tk.Button(
             btn_row, text="? Unknown", font=F_SMALL,
-            bg=FAMILY_COLORS['inconnu'] if is_unknown else C_BTN_NEUTRAL,
+            bg=FAMILY_COLORS['unknown'] if is_unknown else C_BTN_NEUTRAL,
             fg=C_BG if is_unknown else C_TEXT2,
             relief=tk.FLAT, bd=0, padx=10, pady=3, cursor="hand2",
-            command=lambda d=det: self._on_family_change(d, 'inconnu'),
+            command=lambda d=det: self._on_family_change(d, 'unknown'),
         ).pack(side=tk.LEFT)
 
         self._card_refs.append({
@@ -1001,7 +1004,7 @@ class CorrectionTab(tk.Frame):
             w.destroy()
         families_present = sorted({
             det['family'] for det in fr['detections']
-            if det['status'] != 'fp' and det['family'] != 'inconnu'
+            if det['status'] != 'fp' and det['family'] != 'unknown'
         })
         if families_present:
             for fam in families_present:
@@ -1040,7 +1043,7 @@ class CorrectionTab(tk.Frame):
         ref['fam_var'].set(det['family'])
 
         _fam = det['family']
-        if _fam == 'inconnu':
+        if _fam == 'unknown':
             sp_options = _ALL_SPECIES_DISP
             sp_state   = 'readonly'
         else:
@@ -1927,13 +1930,13 @@ class CorrectionTab(tk.Frame):
             for det in fr['detections']:
                 if det['status'] == 'fp':
                     continue
-                is_unknown = det['family'] == 'inconnu'
+                is_unknown = det['family'] == 'unknown'
                 base               = dict(frame_meta.get(fr['frame_num'], _fallback_meta.get(fr['frame_num'], {})))
                 base['camera']     = self._cam_id
                 base['frame']      = fr['frame_num']
                 base['family']     = det['family']
-                base['genus']      = det.get('genus', '') or ('inconnu' if is_unknown else '')
-                base['species']    = det.get('species', '') or ('inconnu' if is_unknown else '')
+                base['genus']      = det.get('genus', '') or ('unknown' if is_unknown else '')
+                base['species']    = det.get('species', '') or ('unknown' if is_unknown else '')
                 base['count']      = 1
                 base['confidence'] = det['confidence']
                 if 'n_frames' in cols and 'n_frames' not in base:
@@ -1949,6 +1952,7 @@ class CorrectionTab(tk.Frame):
         out_df.to_csv(cam_csv_path, index=False)
 
         # Mettre à jour les .txt de classification pour résister à un re-run pipeline
+        _txt_failures = []
         cls_dir = os.path.join(self._drop_dir, f'{self._cam_id}_classifications')
         if os.path.isdir(cls_dir):
             for fr in self._frames:
@@ -1964,8 +1968,25 @@ class CorrectionTab(tk.Frame):
                     try:
                         with open(cls_path, 'w', encoding='utf-8') as f:
                             f.write(content)
-                    except Exception:
-                        pass
+                    except Exception as _e:
+                        # Ces .txt sont l'endroit durable où vivent les
+                        # corrections. Échouer ici en silence donnait un
+                        # « Corrections saved » mensonger : le CSV portait la
+                        # correction, le .txt gardait l'étiquette automatique,
+                        # et tout rechargement la faisait réapparaître.
+                        _txt_failures.append((os.path.basename(cls_path), str(_e)))
+
+        if _txt_failures:
+            for _name, _err in _txt_failures[:5]:
+                self._log(f"[ERROR] Could not update {_name}: {_err}\n", "error")
+            messagebox.showerror(
+                "Corrections not fully saved",
+                f"{len(_txt_failures)} classification file(s) could not be written.\n\n"
+                "The spreadsheet will show your corrections, but they are not stored "
+                "where the pipeline keeps them: reopening this camera would bring the "
+                "automatic labels back. Check that the results folder is not read-only "
+                "or open in another program, then save again.",
+            )
 
         # Sauvegarde du sidecar pour les détections ajoutées manuellement
         _manual_dets = {}
@@ -2015,12 +2036,16 @@ class CorrectionTab(tk.Frame):
                     # .txt est réécrit à chaque sauvegarde).
                     _relabel[_id] = (_det['family'],
                                      _det.get('family_orig', _det['family']))
-        correction_state.record_camera(
-            self._drop_dir, self._cam_id, _fp_ids, _added, _relabel,
-            frames_seen=self._seen_frames,
-            frames_total=len(self._frames),
-            cameras_total=len(self._discover_cameras(self._drop_dir)),
-        )
+        if not correction_state.record_camera(
+                self._drop_dir, self._cam_id, _fp_ids, _added, _relabel,
+                frames_seen=self._seen_frames,
+                frames_total=len(self._frames),
+                cameras_total=len(self._discover_cameras(self._drop_dir))):
+            # Sans cette trace, l'onglet Indicators annoncera « fully automatic
+            # output » sur un drop qui vient d'être corrigé.
+            self._log("[WARN] Could not record the correction in "
+                      "correction_state.json — the spreadsheet will describe "
+                      "this drop as uncorrected.\n", "error")
         self._seen_flushed = len(self._seen_frames)
 
         drop_csv  = os.path.join(self._drop_dir, 'classification_drop.csv')

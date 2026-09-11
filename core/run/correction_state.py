@@ -98,11 +98,18 @@ def clear(drop_dir):
 
 
 def _save(drop_dir, data):
+    """Écrit l'état ; renvoie False si l'écriture a échoué.
+
+    L'appelant a besoin de le savoir : un échec silencieux ici donne un onglet
+    Indicators qui annonce « fully automatic output » alors que le drop vient
+    d'être corrigé.
+    """
     try:
         with open(path_for(drop_dir), 'w', encoding='utf-8') as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
+        return True
     except OSError:
-        pass
+        return False
 
 
 def _merge_originals(stored, current, fp_ids):
@@ -158,7 +165,7 @@ def record_camera(drop_dir, cam_id, fp_ids, added, relabel_candidates,
     if cameras_total:
         data['cameras_total'] = int(cameras_total)
 
-    _save(drop_dir, data)
+    return _save(drop_dir, data)
 
 
 def record_coverage(drop_dir, cam_id, frames_seen, frames_total=0,
@@ -182,7 +189,7 @@ def record_coverage(drop_dir, cam_id, frames_seen, frames_total=0,
         entry['frames_total'] = int(frames_total)
     if cameras_total:
         data['cameras_total'] = int(cameras_total)
-    _save(drop_dir, data)
+    return _save(drop_dir, data)
 
 
 def count_frames_on_disk(drop_dir, cam_id):

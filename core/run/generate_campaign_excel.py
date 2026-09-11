@@ -43,7 +43,7 @@ BANNER_FG     = "92400E"
 ALL_FAMILIES = [
     'acanthuridae', 'carangidae', 'chaetodontidae', 'haemulidae', 'holocentridae',
     'labridae', 'lutjanidae', 'pomacentridae', 'scaridae', 'scombridae',
-    'serranidae', 'sphyraenidae', 'inconnu',
+    'serranidae', 'sphyraenidae', 'unknown',
 ]
 
 COL_WIDTHS = {
@@ -66,6 +66,14 @@ COL_LABELS = {
 }
 
 META_FIELDS = ['date', 'site', 'latitude', 'longitude', 'habitat', 'visibility', 'depth']
+
+
+def _normalise_unknown(df):
+    """Accepte l'ancien libellé français 'inconnu' — cf. generate_excel.py."""
+    for col in ('family', 'genus', 'species'):
+        if col in df.columns:
+            df[col] = df[col].replace('inconnu', 'unknown')
+    return df
 
 
 def _border(cell):
@@ -721,6 +729,7 @@ def main():
     if df.empty:
         print("[WARN] Empty campaign CSV, Excel not generated.")
         return
+    df = _normalise_unknown(df)
 
     wb = Workbook()
     _build_detections_sheet(wb, df)

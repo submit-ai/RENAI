@@ -156,6 +156,23 @@ results_dir         : results  # output folder (relative to RENAI root)
 
 ---
 
+## Filling metadata in bulk
+
+The app asks for a drop's metadata when it processes it. For a campaign already
+on disk, `write_metadata.py` fills them from a field spreadsheet — one row per
+site, matched on the `site` column:
+
+```
+python write_metadata.py --xlsx metadata_drop.xlsx \
+                         --campaign-dir <folder holding one subfolder per drop> \
+                         --results-dir  <the results/ folder>
+```
+
+It writes one `drop_metadata.json` per drop and lists the drops it could not
+match, so a site missing from the spreadsheet is never filled in silently.
+
+---
+
 ## Notes
 
 - Tested on Windows 11, Python 3.10, PyTorch 2.6.0+cu118

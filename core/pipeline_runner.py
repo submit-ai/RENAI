@@ -142,7 +142,11 @@ class PipelineRunner:
         # files, so any previous manual correction is void — drop its trace
         # rather than let the Indicators sheet claim corrections that no longer
         # exist.
-        correction_state.clear(drop_results)
+        if not correction_state.clear(drop_results):
+            self._log(
+                f"[WARN] Could not remove {correction_state.FILENAME} from "
+                f"{drop_name}: the Indicators sheet will report manual "
+                f"corrections that this run has just overwritten.\n", 'warn')
 
         cameras = _discover_cameras(self.drop_path)
         if not cameras:
