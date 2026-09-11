@@ -1,0 +1,16 @@
+results_dir : "results"
+start_delay    : 0   #delay (s) after clap (or t=0) before the first extracted frame
+frame_interval : 1   #seconds between each frame
+clap_threshold : 5.0 #minimum clap detection score (mean absolute difference between frames)
+
+#seuils de confiance
+detection_threshold : 0.3
+
+#seuils de panique
+min_surface : 4000  #surface minimale des détections
+min_dim : 64  #dimension minimale des détections
+
+#chemins des modèles
+detector_model : "core/models/detecteur/rfdetr_model.pth"
+classifier_model : "core/models/classifieur/classifieur.joblib"
+radio_model : "nvidia/C-RADIOv3-H"

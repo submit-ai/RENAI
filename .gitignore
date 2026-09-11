@@ -1,0 +1,38 @@
+# Snakemake
+.snakemake/
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Données (non versionnées)
+drops/*
+!drops/.gitkeep
+
+results/*
+!results/.gitkeep
+
+# Modèles ML (dépôt Zenodo — trop lourds pour GitHub)
+core/models/
+
+# Build & installeur Windows
+installer/
+build/*.exe
+build/*.tar.gz
+
+# Archives et travaux locaux
+archives/*
+test_videos/
+
+# Scripts de dev local (référencent l'env conda de développement)
+lancer_app.bat
+lancer_gui.sh
+
+# Assets sources (PNG originaux — seul le .ico est versionné)
+assets/*.png
+
+# IDE / OS
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store
