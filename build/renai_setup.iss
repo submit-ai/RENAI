@@ -161,22 +161,22 @@ Source: "..\config.yaml"; DestDir: "{app}\app"; Flags: ignoreversion
 ; Pipeline scripts
 Source: "..\core\pipeline_runner.py"; DestDir: "{app}\app\core"; Flags: ignoreversion
 Source: "..\core\version.py";         DestDir: "{app}\app\core"; Flags: ignoreversion
-Source: "..\core\run\*";    DestDir: "{app}\app\core\run";    Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "..\core\output\*"; DestDir: "{app}\app\core\output"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "..\core\export\*"; DestDir: "{app}\app\core\export"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "..\core\run\*";    DestDir: "{app}\app\core\run"; Excludes: "*.pyc,__pycache__";    Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "..\core\output\*"; DestDir: "{app}\app\core\output"; Excludes: "*.pyc,__pycache__"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "..\core\export\*"; DestDir: "{app}\app\core\export"; Excludes: "*.pyc,__pycache__"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 ; Custom trained models (rfdetr detector + classifier)
 Source: "..\core\models\detecteur\rfdetr_model.pth";             DestDir: "{app}\app\core\models\detecteur";    Flags: ignoreversion
 ; Bundled HuggingFace cache for facebook/dinov2-base (RF-DETR backbone) — avoids any
 ; network dependency on huggingface.co at runtime (machines behind a restricted network)
-Source: "..\core\models\detecteur\hf_cache\*";                   DestDir: "{app}\app\core\models\detecteur\hf_cache"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "..\core\models\detecteur\hf_cache\*";                   DestDir: "{app}\app\core\models\detecteur\hf_cache"; Excludes: "*.pyc,__pycache__"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "..\core\models\classifieur\classifieur.joblib";         DestDir: "{app}\app\core\models\classifieur";  Flags: ignoreversion
 Source: "..\core\models\classifieur\label_encoder.npy";          DestDir: "{app}\app\core\models\classifieur";  Flags: ignoreversion
 Source: "..\core\models\classifieur\scaler.joblib";              DestDir: "{app}\app\core\models\classifieur";  Flags: ignoreversion
 Source: "..\core\models\classifieur\pca.joblib";               DestDir: "{app}\app\core\models\classifieur";  Flags: ignoreversion
 ; Bundled HuggingFace cache for nvidia/C-RADIOv3-H (weights + trust_remote_code files)
 ; — same reason as dinov2-base above, avoids any network dependency at runtime
-Source: "..\core\models\classifieur\hf_cache\*";                 DestDir: "{app}\app\core\models\classifieur\hf_cache"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "..\core\models\classifieur\hf_cache\*";                 DestDir: "{app}\app\core\models\classifieur\hf_cache"; Excludes: "*.pyc,__pycache__"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 ; UI modules (correction + habitat tabs)
 Source: "..\ui\correction_tab.py"; DestDir: "{app}\app\ui"; Flags: ignoreversion
