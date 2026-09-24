@@ -15,7 +15,9 @@ Automatic fish detection and classification from drop camera videos (DOP protoco
 
 ## Installation
 
-Download **`RENAI_Setup_v1.3.0.exe`** (~3.5 GB, includes all bundled ML models) from the archived release on Zenodo: **https://doi.org/10.5281/zenodo.21562967**, then run it.
+Download **`RENAI_Setup_v1.3.0.exe`** (~3.5 GB, includes all bundled ML models) from the Zenodo archive, then run it.
+
+> **For peer review:** the Zenodo archive is accessible through the link provided with the manuscript. The archive is not yet published, so its DOI is reserved but not yet resolvable; a permanent DOI will be active upon publication.
 
 The installer handles everything: Python environment, PyTorch (CUDA 11.8), all dependencies, and models. No manual setup required.
 
@@ -185,4 +187,6 @@ match, so a site missing from the spreadsheet is never filled in silently.
 This repository contains an anonymized version of RENAI, deposited for double-blind peer review.
 
 - Code: this repository
-- Packaged installer + models (Zenodo archive): https://doi.org/10.5281/zenodo.21562967
+- Packaged installer, model weights and third-party licences: Zenodo archive, accessible to
+  reviewers through the link provided with the manuscript. Its DOI is reserved and will become
+  resolvable upon publication.
